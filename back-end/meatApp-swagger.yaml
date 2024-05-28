@@ -1,0 +1,818 @@
+openapi: 3.0.0
+info:
+  title: Meat Product App API
+  description: API for managing meat products, user accounts, and related features.
+  version: 1.0.0
+servers:
+  - url: https://api.meatproductapp.com/v1
+paths:
+  /user:
+    post:
+      tags:
+        - Users
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+  /user/login:
+    get:
+      tags:
+        - Users
+      summary: Logs user into the system
+      description: ''
+      operationId: loginUser
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: false
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/xml:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid username/password supplied
+  /user/logout:
+    get:
+      tags:
+        - Users
+      summary: Logs out current logged in user session
+      description: ''
+      operationId: logoutUser
+      parameters: []
+      responses:
+        default:
+          description: successful operation
+  
+  /user/{userId}:
+    get:
+      summary: Get user details
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+        - name: userId
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+    put:
+      summary: Update user details
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User details updated successfully
+  /user/{userId}/savedProducts:
+   get:
+      summary: Get user's saved products
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+  /user/{userId}/savedProducts/{productId}:
+    post:
+      summary: Add a new product
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: integer
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to add
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: Product added successfully
+    delete:
+      summary: Delete a product
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: integer
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to deleted
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Product deleted successfully
+  /user/{userId}/feedback/{productId}:
+    post:
+      summary: Add a new product feedback
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: integer
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to add feedback
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Feedback'
+      responses:
+        '201':
+          description: Feedback added successfully
+    delete:
+      summary: Delete a product feedback
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: integer
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to deleted feedback
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Feedback deleted successfully
+  /products:
+    get:
+      summary: Get all products
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+    post:
+      summary: Create a new product
+      tags:
+        - Products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: Product created successfully
+  /products/{productId}:
+    get:
+      summary: Get product details by ID
+      tags:
+        - Products
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+    put:
+      summary: Update product details
+      tags:
+        - Products
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Product details updated successfully
+    delete:
+      summary: Delete a product
+      tags:
+        - Products
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to delete
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Product deleted successfully
+  /products/{productId}/feedback:
+    get:
+      summary: Get product feedbacks by ID
+      tags:
+        - Products
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackList'
+  /category:
+    get:
+        summary: Get all categories
+        tags:
+          - Category
+        responses:
+          '200':
+            description: Successful retrieval
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/CategoryList'
+    post:
+      summary: Create a new category
+      tags:
+        - Category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '201':
+          description: Product created successfully
+  /category/{categoryId}:
+    get:
+      summary: Get category details by ID
+      tags:
+        - Category
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: ID of the category to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+    put:
+      summary: Update category details
+      tags:
+        - Category
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: ID of the category to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '200':
+          description: Category details updated successfully
+    delete:
+      summary: Delete a category
+      tags:
+        - Category
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: ID of the category to delete
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Category deleted successfully
+  /supermarket:
+    get:
+      summary: Get all supermarkets
+      tags:
+        - Supermarket
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupermarketList'
+    post:
+      summary: Create a new supermarket
+      tags:
+        - Supermarket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Supermarket'
+      responses:
+        '201':
+          description: Product created successfully
+  /supermarket/{supermarketId}:
+    get:
+        summary: Get a supermarket by ID
+        tags:
+          - Supermarket
+        parameters:
+          - name: supermarketId
+            in: path
+            required: true
+            description: ID of the supermarket to retrieve
+            schema:
+              type: integer
+        responses:
+          '200':
+            description: Successful retrieval
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Supermarket'
+    delete:
+        tags:
+          - Supermarket
+        summary: Delete supermarket by Id
+        description: This can only be done by the admin.
+        operationId: deleteProductBySupermarketId
+        parameters:
+          - name: supermarketId
+            in: path
+            description: The name that needs to be deleted
+            required: true
+            schema:
+              type: string
+        responses:
+          '400':
+            description: Invalid supermarket supplied
+          '404':
+            description: Supermarket not found
+    put:
+      summary: Update supermarket by Id
+      tags:
+        - Supermarket
+      parameters:
+        - name: supermarketId
+          in: path
+          required: true
+          description: ID of the supermarket to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Supermarket'
+      responses:
+        '200':
+          description: Supermarket details updated successfully
+
+  /scanQR:
+    get:
+      summary: Scan QR code to get product ID
+      tags:
+        - ScanQr
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: QR code string
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+  /news:
+    post:
+      summary: Create a new news
+      tags:
+        - News
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/News'
+      responses:
+        '201':
+          description: News created successfully
+  /news/{newsId}:
+    get:
+      summary: Get news by ID
+      tags:
+        - News
+      parameters:
+        - name: newsId
+          in: path
+          required: true
+          description: ID of the news to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/News'
+    put:
+      summary: Update news details
+      tags:
+        - News
+      parameters:
+        - name: newsId
+          in: path
+          required: true
+          description: ID of the news to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/News'
+      responses:
+        '200':
+          description: News details updated successfully
+    delete:
+      summary: Delete a news
+      tags:
+        - News
+      parameters:
+        - name: newsId
+          in: path
+          required: true
+          description: ID of the news to delete
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: News deleted successfully
+  /news/positive:
+    get:
+      summary: Get positive news
+      tags:
+        - News
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsList'
+  /news/negative:
+    get:
+      summary: Get negative news
+      tags:
+        - News
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsList'
+
+  /statistics/{statisticsId}:
+    get:
+      summary: Get statistics by ID
+      tags:
+        - Statistics
+      parameters:
+        - name: statisticsId
+          in: path
+          required: true
+          description: ID of the statistics to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+    put:
+      summary: Update statistics details
+      tags:
+        - Statistics
+      parameters:
+        - name: statisticsId
+          in: path
+          required: true
+          description: ID of the statistics to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Statistics'
+      responses:
+        '200':
+          description: statistics details updated successfully
+    delete:
+      summary: Delete a statistics
+      tags:
+        - Statistics
+      parameters:
+        - name: statisticsId
+          in: path
+          required: true
+          description: ID of the statistics to delete
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: statistics deleted successfully
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - email
+        - password
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+          format: uuid
+        description:
+          type: string
+        price:
+          type: number
+        supermarket:
+          type: string
+        feedbackList:
+          $ref: '#/components/schemas/FeedbackList'
+    Feedback:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        comment:
+          type: string
+    FeedbackList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Feedback'
+    ProductList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Product'
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        products:
+            $ref: '#/components/schemas/ProductList'
+    CategoryList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Category'
+    QRCode:
+      type: object
+      properties:
+        code:
+          type: string
+          format: uuid
+    News:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        date:
+          type: string
+          format: date-time
+      required:
+        - title
+        - content
+        - date
+    NewsList:
+      type: array
+      items:
+        $ref: '#/components/schemas/News'
+    Statistics:
+      type: object
+      properties:
+        totalProducts:
+          type: integer
+        totalSupermarkets:
+          type: integer
+        totalUsers:
+          type: integer
+    Supermarket:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier of the supermarket.
+        name:
+          type: string
+          description: The name of the supermarket.
+        location:
+          type: string
+          description: The location of the supermarket.
+        products:
+          $ref: '#/components/schemas/ProductList'
+        highlightedProducts:
+          $ref: '#/components/schemas/ProductList'
+    SupermarketList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Supermarket'
